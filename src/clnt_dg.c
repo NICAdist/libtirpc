@@ -61,6 +61,9 @@
 #include <sys/uio.h>
 #endif
 
+#ifdef HAVE_RPCSEC_GSS
+#include <rpc/auth_gss.h>
+#endif
 
 #define MAX_DEFAULT_FDS                 20000
 
@@ -333,6 +336,11 @@ clnt_dg_call(cl, proc, xargs, argsp, xresults, resultsp, utimeout)
 		sa = (struct sockaddr *)&cu->cu_raddr;
 		salen = cu->cu_rlen;
 	}
+
+#ifdef HAVE_RPCSEC_GSS
+	if (is_authgss_client(cl))
+		nrefreshes = 0;
+#endif
 
 	/* Clean up in case the last call ended in a longjmp(3) call. */
 call_again:

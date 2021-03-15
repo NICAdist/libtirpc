@@ -69,6 +69,10 @@
 #include "rpc_com.h"
 #include "clnt_fd_locks.h"
 
+#ifdef HAVE_RPCSEC_GSS
+#include <rpc/auth_gss.h>
+#endif
+
 #define MCALL_MSG_SIZE 24
 
 #define CMGROUP_MAX    16
@@ -362,6 +366,11 @@ clnt_vc_call(cl, proc, xdr_args, args_ptr, xdr_results, results_ptr, timeout)
 	shipnow =
 	    (xdr_results == NULL && timeout.tv_sec == 0
 	    && timeout.tv_usec == 0) ? FALSE : TRUE;
+
+#ifdef HAVE_RPCSEC_GSS
+	if (is_authgss_client(cl))
+		refreshes = 0;
+#endif
 
 call_again:
 	xdrs->x_op = XDR_ENCODE;
