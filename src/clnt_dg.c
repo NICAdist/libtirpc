@@ -456,9 +456,9 @@ get_reply:
 		 cmsg = CMSG_NXTHDR (&msg, cmsg))
 	      if (cmsg->cmsg_level == SOL_IP && cmsg->cmsg_type == IP_RECVERR)
 		{
-		  mem_free(cbuf, (outlen + 256));
 		  e = (struct sock_extended_err *) CMSG_DATA(cmsg);
 		  cu->cu_error.re_errno = e->ee_errno;
+		  mem_free(cbuf, (outlen + 256));
 		  release_fd_lock(cu->cu_fd_lock, mask);
 		  return (cu->cu_error.re_status = RPC_CANTRECV);
 		}
