@@ -826,7 +826,8 @@ error:
  * The algorithm used: If the transports is TCP or UDP, it first tries
  * version 4 (srv4), then 3 and then fall back to version 2 (portmap).
  * With this algorithm, we get performance as well as a plan for
- * obsoleting version 2.
+ * obsoleting version 2. This behaviour is reverted to old algorithm
+ * if RPCB_V2FIRST environment var is defined
  *
  * For all other transports, the algorithm remains as 4 and then 3.
  *
@@ -846,6 +847,10 @@ __rpcb_findaddr_timed(program, version, nconf, host, clpp, tp)
 {
 #ifdef NOTUSED
 	static bool_t check_rpcbind = TRUE;
+#endif
+
+#ifdef PORTMAP
+	static bool_t portmap_first = FALSE;
 #endif
 	CLIENT *client = NULL;
 	RPCB parms;
@@ -903,8 +908,18 @@ __rpcb_findaddr_timed(program, version, nconf, host, clpp, tp)
 		parms.r_addr = (char *) &nullstring[0];
 	}
 
-	/* First try from start_vers(4) and then version 3 (RPCBVERS) */
+	/* First try from start_vers(4) and then version 3 (RPCBVERS), except
+	 * if env. var RPCB_V2FIRST is defined */
 
+#ifdef PORTMAP
+	if (getenv(V2FIRST)) {
+		portmap_first = TRUE;
+		LIBTIRPC_DEBUG(3, ("__rpcb_findaddr_timed: trying v2-port first\n"));
+		goto portmap;
+	}
+#endif
+
+rpcbind:
 	CLNT_CONTROL(client, CLSET_RETRY_TIMEOUT, (char *) &rpcbrmttime);
 	for (vers = start_vers;  vers >= RPCBVERS; vers--) {
 		/* Set the version */
@@ -952,10 +967,17 @@ __rpcb_findaddr_timed(program, version, nconf, host, clpp, tp)
 	}
 
 #ifdef PORTMAP 	/* Try version 2 for TCP or UDP */
+	if (portmap_first)
+		goto error; /* we tried all versions if reached here */
+portmap:
 	if (strcmp(nconf->nc_protofmly, NC_INET) == 0) {
 		address = __try_protocol_version_2(program, version, nconf, host, tp);
-		if (address == NULL)
-			goto error;
+		if (address == NULL) {
+			if (portmap_first)
+				goto rpcbind;
+			else
+				goto error;
+		}
 	}
 #endif		/* PORTMAP */
 
