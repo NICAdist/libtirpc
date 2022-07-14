@@ -798,6 +798,10 @@ __try_protocol_version_2(program, version, nconf, host, tp)
 	pmapaddress->len = pmapaddress->maxlen = remote.len;
 
 	CLNT_DESTROY(client);
+
+	if (parms.r_addr != NULL && parms.r_addr != nullstring)
+		free(parms.r_addr);
+
 	return pmapaddress;
 
 error:
@@ -806,6 +810,10 @@ error:
 		client = NULL;
 
 	}
+
+	if (parms.r_addr != NULL && parms.r_addr != nullstring)
+		free(parms.r_addr);
+
 	return (NULL);
 
 }
