@@ -101,9 +101,9 @@ extern mutex_t clnt_fd_lock;
 #define	release_fd_lock(fd_lock, mask) {	\
 	mutex_lock(&clnt_fd_lock);	\
 	fd_lock->active = FALSE;	\
-	mutex_unlock(&clnt_fd_lock);	\
 	thr_sigsetmask(SIG_SETMASK, &(mask), NULL); \
 	cond_signal(&fd_lock->cv);	\
+	mutex_unlock(&clnt_fd_lock);    \
 }
 
 static const char mem_err_clnt_dg[] = "clnt_dg_create: out of memory";
@@ -172,12 +172,15 @@ clnt_dg_create(fd, svcaddr, program, version, sendsz, recvsz)
 	if (dg_fd_locks == (fd_locks_t *) NULL) {
 		dg_fd_locks = fd_locks_init();
 		if (dg_fd_locks == (fd_locks_t *) NULL) {
+			mutex_unlock(&clnt_fd_lock);
 			goto err1;
 		}
 	}
 	fd_lock = fd_lock_create(fd, dg_fd_locks);
-	if (fd_lock == (fd_lock_t *) NULL)
+	if (fd_lock == (fd_lock_t *) NULL) {
+		mutex_unlock(&clnt_fd_lock);
 		goto err1;
+	}
 
 	mutex_unlock(&clnt_fd_lock);
 	thr_sigsetmask(SIG_SETMASK, &(mask), NULL);
@@ -573,9 +576,9 @@ clnt_dg_freeres(cl, xdr_res, res_ptr)
 	cu->cu_fd_lock->active = TRUE;
 	xdrs->x_op = XDR_FREE;
 	dummy = (*xdr_res)(xdrs, res_ptr);
-	mutex_unlock(&clnt_fd_lock);
 	thr_sigsetmask(SIG_SETMASK, &mask, NULL);
 	cond_signal(&cu->cu_fd_lock->cv);
+	mutex_unlock(&clnt_fd_lock);
 	return (dummy);
 }
 

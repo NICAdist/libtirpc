@@ -153,9 +153,9 @@ extern mutex_t  clnt_fd_lock;
 #define release_fd_lock(fd_lock, mask) {	\
 	mutex_lock(&clnt_fd_lock);	\
 	fd_lock->active = FALSE;	\
-	mutex_unlock(&clnt_fd_lock);	\
 	thr_sigsetmask(SIG_SETMASK, &(mask), (sigset_t *) NULL);	\
 	cond_signal(&fd_lock->cv);	\
+	mutex_unlock(&clnt_fd_lock);    \
 }
 
 static const char clnt_vc_errstr[] = "%s : %s";
@@ -216,7 +216,9 @@ clnt_vc_create(fd, raddr, prog, vers, sendsz, recvsz)
 	if (vc_fd_locks == (fd_locks_t *) NULL) {
 		vc_fd_locks = fd_locks_init();
 		if (vc_fd_locks == (fd_locks_t *) NULL) {
-			struct rpc_createerr *ce = &get_rpc_createerr();
+			struct rpc_createerr *ce;
+			mutex_unlock(&clnt_fd_lock);
+			ce = &get_rpc_createerr();
 			ce->cf_stat = RPC_SYSTEMERROR;
 			ce->cf_error.re_errno = errno;
 			goto err;
@@ -224,7 +226,9 @@ clnt_vc_create(fd, raddr, prog, vers, sendsz, recvsz)
 	}
 	fd_lock = fd_lock_create(fd, vc_fd_locks);
 	if (fd_lock == (fd_lock_t *) NULL) {
-		struct rpc_createerr *ce = &get_rpc_createerr();
+		struct rpc_createerr *ce;
+		mutex_unlock(&clnt_fd_lock);
+		ce = &get_rpc_createerr();
 		ce->cf_stat = RPC_SYSTEMERROR;
 		ce->cf_error.re_errno = errno;
 		goto err;
@@ -495,9 +499,9 @@ clnt_vc_freeres(cl, xdr_res, res_ptr)
 		cond_wait(&ct->ct_fd_lock->cv, &clnt_fd_lock);
 	xdrs->x_op = XDR_FREE;
 	dummy = (*xdr_res)(xdrs, res_ptr);
-	mutex_unlock(&clnt_fd_lock);
 	thr_sigsetmask(SIG_SETMASK, &(mask), NULL);
 	cond_signal(&ct->ct_fd_lock->cv);
+	mutex_unlock(&clnt_fd_lock);
 
 	return dummy;
 }
