@@ -153,6 +153,7 @@ extern mutex_t  clnt_fd_lock;
 #define release_fd_lock(fd_lock, mask) {	\
 	mutex_lock(&clnt_fd_lock);	\
 	fd_lock->active = FALSE;	\
+	fd_lock->pending--;		\
 	thr_sigsetmask(SIG_SETMASK, &(mask), (sigset_t *) NULL);	\
 	cond_signal(&fd_lock->cv);	\
 	mutex_unlock(&clnt_fd_lock);    \
@@ -357,6 +358,7 @@ clnt_vc_call(cl, proc, xdr_args, args_ptr, xdr_results, results_ptr, timeout)
 	sigfillset(&newmask);
 	thr_sigsetmask(SIG_SETMASK, &newmask, &mask);
 	mutex_lock(&clnt_fd_lock);
+	ct->ct_fd_lock->pending++;
 	while (ct->ct_fd_lock->active)
 		cond_wait(&ct->ct_fd_lock->cv, &clnt_fd_lock);
 	ct->ct_fd_lock->active = TRUE;
@@ -495,10 +497,12 @@ clnt_vc_freeres(cl, xdr_res, res_ptr)
 	sigfillset(&newmask);
 	thr_sigsetmask(SIG_SETMASK, &newmask, &mask);
 	mutex_lock(&clnt_fd_lock);
+	ct->ct_fd_lock->pending++;
 	while (ct->ct_fd_lock->active)
 		cond_wait(&ct->ct_fd_lock->cv, &clnt_fd_lock);
 	xdrs->x_op = XDR_FREE;
 	dummy = (*xdr_res)(xdrs, res_ptr);
+	ct->ct_fd_lock->pending--;
 	thr_sigsetmask(SIG_SETMASK, &(mask), NULL);
 	cond_signal(&ct->ct_fd_lock->cv);
 	mutex_unlock(&clnt_fd_lock);
@@ -533,6 +537,7 @@ clnt_vc_control(cl, request, info)
 	sigfillset(&newmask);
 	thr_sigsetmask(SIG_SETMASK, &newmask, &mask);
 	mutex_lock(&clnt_fd_lock);
+	ct->ct_fd_lock->pending++;
 	while (ct->ct_fd_lock->active)
 		cond_wait(&ct->ct_fd_lock->cv, &clnt_fd_lock);
 	ct->ct_fd_lock->active = TRUE;
@@ -655,8 +660,14 @@ clnt_vc_destroy(cl)
 	sigfillset(&newmask);
 	thr_sigsetmask(SIG_SETMASK, &newmask, &mask);
 	mutex_lock(&clnt_fd_lock);
-	while (ct_fd_lock->active)
+	/* wait until all pending operations on client are completed. */
+	while (ct_fd_lock->pending > 0) {
+		/* If a blocked operation can be awakened, then do it. */
+		if (ct_fd_lock->active == FALSE)
+			cond_signal(&ct_fd_lock->cv);
+		/* keep waiting... */
 		cond_wait(&ct_fd_lock->cv, &clnt_fd_lock);
+	}
 	if (ct->ct_closeit && ct->ct_fd != -1) {
 		(void)close(ct->ct_fd);
 	}
