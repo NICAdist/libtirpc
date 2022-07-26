@@ -573,7 +573,6 @@ clnt_dg_freeres(cl, xdr_res, res_ptr)
 	mutex_lock(&clnt_fd_lock);
 	while (cu->cu_fd_lock->active)
 		cond_wait(&cu->cu_fd_lock->cv, &clnt_fd_lock);
-	cu->cu_fd_lock->active = TRUE;
 	xdrs->x_op = XDR_FREE;
 	dummy = (*xdr_res)(xdrs, res_ptr);
 	thr_sigsetmask(SIG_SETMASK, &mask, NULL);
