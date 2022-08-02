@@ -221,7 +221,8 @@ extern pthread_mutex_t	rpcbaddr_cache_lock;
 
 static struct address_cache *
 copy_of_cached(host, netid)
-	const char *host, *netid;
+	const char *host; 
+	char *netid;
 {
 	struct address_cache *cptr, *copy = NULL;
 
