@@ -496,11 +496,7 @@ getpmaphandle(nconf, hostname, tgtaddr)
 	CLIENT *client = NULL;
 	rpcvers_t pmapvers = 2;
 
-	/*
-	 * Try UDP only - there are some portmappers out
-	 * there that use UDP only.
-	 */
-	if (nconf == NULL || strcmp(nconf->nc_proto, NC_TCP) == 0) {
+	if (nconf == NULL) {
 		struct netconfig *newnconf;
 
 		if ((newnconf = getnetconfigent("udp")) == NULL) {
@@ -509,7 +505,8 @@ getpmaphandle(nconf, hostname, tgtaddr)
 		}
 		client = getclnthandle(hostname, newnconf, tgtaddr);
 		freenetconfigent(newnconf);
-	} else if (strcmp(nconf->nc_proto, NC_UDP) == 0) {
+	} else if (strcmp(nconf->nc_proto, NC_UDP) == 0 ||
+	    strcmp(nconf->nc_proto, NC_TCP) == 0) {
 		if (strcmp(nconf->nc_protofmly, NC_INET) != 0)
 			return NULL;
 		client = getclnthandle(hostname, nconf, tgtaddr);
