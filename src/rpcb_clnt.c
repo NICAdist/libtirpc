@@ -104,17 +104,27 @@ destroy_addr(addr)
 {
 	if (addr == NULL)
 		return;
-	if(addr->ac_host != NULL)
+	if (addr->ac_host != NULL) {
 		free(addr->ac_host);
-	if(addr->ac_netid != NULL)
+		addr->ac_host = NULL;
+	}
+	if (addr->ac_netid != NULL) {
 		free(addr->ac_netid);
-	if(addr->ac_uaddr != NULL)
+		addr->ac_netid = NULL;
+	}
+	if (addr->ac_uaddr != NULL) {
 		free(addr->ac_uaddr);
-	if(addr->ac_taddr != NULL) {
-		if(addr->ac_taddr->buf != NULL)
+		addr->ac_uaddr = NULL;
+	}
+	if (addr->ac_taddr != NULL) {
+		if(addr->ac_taddr->buf != NULL) {
 			free(addr->ac_taddr->buf);
+			addr->ac_taddr->buf = NULL;
+		}
+		addr->ac_taddr = NULL;
 	}
 	free(addr);
+	addr = NULL;
 }
 
 /*
