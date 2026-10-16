@@ -147,9 +147,7 @@ load_blacklist (void)
 }
 
 int
-bindresvport_sa(sd, sa)
-        int sd;
-        struct sockaddr *sa;
+bindresvport_sa(int sd, struct sockaddr *sa)
 {
         int res, af;
         struct sockaddr_storage myaddr;

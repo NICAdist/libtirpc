@@ -57,9 +57,7 @@ extern struct opaque_auth _null_auth;
  * (see auth.h)
  */
 bool_t
-xdr_opaque_auth(xdrs, ap)
-	XDR *xdrs;
-	struct opaque_auth *ap;
+xdr_opaque_auth(XDR *xdrs, struct opaque_auth *ap)
 {
 
 	assert(xdrs != NULL);
@@ -75,9 +73,7 @@ xdr_opaque_auth(xdrs, ap)
  * XDR a DES block
  */
 bool_t
-xdr_des_block(xdrs, blkp)
-	XDR *xdrs;
-	des_block *blkp;
+xdr_des_block(XDR *xdrs, des_block *blkp)
 {
 
 	assert(xdrs != NULL);
@@ -92,9 +88,7 @@ xdr_des_block(xdrs, blkp)
  * XDR the MSG_ACCEPTED part of a reply message union
  */
 bool_t
-xdr_accepted_reply(xdrs, ar)
-	XDR *xdrs;   
-	struct accepted_reply *ar;
+xdr_accepted_reply(XDR *xdrs, struct accepted_reply *ar)
 {
 
 	assert(xdrs != NULL);
@@ -128,9 +122,7 @@ xdr_accepted_reply(xdrs, ar)
  * XDR the MSG_DENIED part of a reply message union
  */
 bool_t 
-xdr_rejected_reply(xdrs, rr)
-	XDR *xdrs;
-	struct rejected_reply *rr;
+xdr_rejected_reply(XDR *xdrs, struct rejected_reply *rr)
 {
 
 	assert(xdrs != NULL);
@@ -162,9 +154,7 @@ static const struct xdr_discrim reply_dscrm[3] = {
  * XDR a reply message
  */
 bool_t
-xdr_replymsg(xdrs, rmsg)
-	XDR *xdrs;
-	struct rpc_msg *rmsg;
+xdr_replymsg(XDR *xdrs, struct rpc_msg *rmsg)
 {
 	assert(xdrs != NULL);
 	assert(rmsg != NULL);
@@ -186,9 +176,7 @@ xdr_replymsg(xdrs, rmsg)
  * The rm_xid is not really static, but the user can easily munge on the fly.
  */
 bool_t
-xdr_callhdr(xdrs, cmsg)
-	XDR *xdrs;
-	struct rpc_msg *cmsg;
+xdr_callhdr(XDR *xdrs, struct rpc_msg *cmsg)
 {
 
 	assert(xdrs != NULL);
@@ -209,9 +197,7 @@ xdr_callhdr(xdrs, cmsg)
 /* ************************** Client utility routine ************* */
 
 static void
-accepted(acpt_stat, error)
-	enum accept_stat acpt_stat;
-	struct rpc_err *error;
+accepted(enum accept_stat acpt_stat, struct rpc_err *error)
 {
 
 	assert(error != NULL);
@@ -250,9 +236,7 @@ accepted(acpt_stat, error)
 }
 
 static void 
-rejected(rjct_stat, error)
-	enum reject_stat rjct_stat;
-	struct rpc_err *error;
+rejected(enum reject_stat rjct_stat, struct rpc_err *error)
 {
 
 	assert(error != NULL);
@@ -277,9 +261,7 @@ rejected(rjct_stat, error)
  * given a reply message, fills in the error
  */
 void
-_seterr_reply(msg, error)
-	struct rpc_msg *msg;
-	struct rpc_err *error;
+_seterr_reply(struct rpc_msg *msg, struct rpc_err *error)
 {
 
 	assert(msg != NULL);

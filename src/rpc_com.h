@@ -46,6 +46,18 @@
 extern "C" {
 #endif
 
+#ifndef SOL_IPV6
+  #ifdef IPPROTO_IPV6
+  #define SOL_IPV6 IPPROTO_IPV6
+  #endif
+#endif
+
+#ifndef SOL_IP
+  #ifdef IPPROTO_IP
+  #define SOL_IP IPPROTO_IP
+  #endif
+#endif
+
 struct netbuf *__rpc_set_netbuf(struct netbuf *, const void *, size_t);
 
 struct netbuf *__rpcb_findaddr_timed(rpcprog_t, rpcvers_t,
@@ -60,6 +72,12 @@ bool_t __xdrrec_getrec(XDR *, enum xprt_stat *, bool_t);
 void __xprt_unregister_unlocked(SVCXPRT *);
 void __xprt_set_raddr(SVCXPRT *, const struct sockaddr_storage *);
 
+/* Evaluate to actual length of the `sockaddr_un' structure, whether
+ * abstract or not.
+ */
+#include <stddef.h>
+#define SUN_LEN_A(ptr) (offsetof(struct sockaddr_un, sun_path)	\
+			+ 1 + strlen((ptr)->sun_path + 1))
 
 extern int __svc_maxrec;
 

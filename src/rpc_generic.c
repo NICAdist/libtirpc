@@ -127,9 +127,10 @@ __rpc_dtbsize()
  */
 u_int
 /*ARGSUSED*/
-__rpc_get_t_size(af, proto, size)
-	int af, proto;
-	int size;	/* Size requested */
+__rpc_get_t_size(
+	int af, 
+	int proto,
+	int size)	/* Size requested */
 {
 	int maxsize, defsize;
 
@@ -156,8 +157,7 @@ __rpc_get_t_size(af, proto, size)
  * Find the appropriate address buffer size
  */
 u_int
-__rpc_get_a_size(af)
-	int af;
+__rpc_get_a_size(int af)
 {
 	switch (af) {
 	case AF_INET:
@@ -193,8 +193,7 @@ strlocase(p)
  * If nettype is NULL, it defaults to NETPATH.
  */
 static int
-getnettype(nettype)
-	const char *nettype;
+getnettype(const char *nettype)
 {
 	int i;
 
@@ -218,8 +217,7 @@ getnettype(nettype)
  * This should be freed by calling freenetconfigent()
  */
 struct netconfig *
-__rpc_getconfip(nettype)
-	const char *nettype;
+__rpc_getconfip(const char *nettype)
 {
 	char *netid;
 	char *netid_tcp = (char *) NULL;
@@ -287,8 +285,7 @@ __rpc_getconfip(nettype)
  * __rpc_getconf().
  */
 void *
-__rpc_setconf(nettype)
-	const char *nettype;
+__rpc_setconf(const char *nettype)
 {
 	struct handle *handle;
 
@@ -331,8 +328,7 @@ __rpc_setconf(nettype)
  * __rpc_setconf() should have been called previously.
  */
 struct netconfig *
-__rpc_getconf(vhandle)
-	void *vhandle;
+__rpc_getconf(void *vhandle)
 {
 	struct handle *handle;
 	struct netconfig *nconf;
@@ -408,8 +404,7 @@ __rpc_getconf(vhandle)
 }
 
 void
-__rpc_endconf(vhandle)
-	void * vhandle;
+__rpc_endconf(void * vhandle)
 {
 	struct handle *handle;
 
@@ -430,8 +425,7 @@ __rpc_endconf(vhandle)
  * Returns NULL if fails, else a non-NULL pointer.
  */
 void *
-rpc_nullproc(clnt)
-	CLIENT *clnt;
+rpc_nullproc(CLIENT *clnt)
 {
 	struct timeval TIMEOUT = {25, 0};
 
@@ -447,8 +441,7 @@ rpc_nullproc(clnt)
  * one succeeds in finding the netconf for the given fd.
  */
 struct netconfig *
-__rpcgettp(fd)
-	int fd;
+__rpcgettp(int fd)
 {
 	const char *netid;
 	struct __rpc_sockinfo si;
@@ -650,7 +643,8 @@ __rpc_taddr2uaddr_af(int af, const struct netbuf *nbuf)
 		if (path_len < 0)
 			return NULL;
 
-		if (asprintf(&ret, "%.*s", path_len, sun->sun_path) < 0)
+		if (asprintf(&ret, "%c%.*s", sun->sun_path[0] ?: '@',
+			     path_len - 1, sun->sun_path + 1) < 0)
 			return (NULL);
 		break;
 	default:
@@ -682,9 +676,10 @@ __rpc_uaddr2taddr_af(int af, const char *uaddr)
 
 	/*
 	 * AF_LOCAL addresses are expected to be absolute
-	 * pathnames, anything else will be AF_INET or AF_INET6.
+	 * pathnames or abstract names, anything else will be
+	 * AF_INET or AF_INET6.
 	 */
-	if (*addrstr != '/') {
+	if (*addrstr != '/' && *addrstr != '@') {
 		p = strrchr(addrstr, '.');
 		if (p == NULL)
 			goto out;
@@ -747,6 +742,9 @@ __rpc_uaddr2taddr_af(int af, const char *uaddr)
 		strncpy(sun->sun_path, addrstr, sizeof(sun->sun_path) - 1);
 		ret->len = SUN_LEN(sun);
 		ret->maxlen = sizeof(struct sockaddr_un);
+		if (sun->sun_path[0] == '@')
+			/* Abstract address */
+			sun->sun_path[0] = '\0';
 		ret->buf = sun;
 		break;
 	default:
@@ -834,6 +832,7 @@ __rpc_sockisbound(int fd)
 		struct sockaddr_un  usin;
 	} u_addr;
 	socklen_t slen;
+	int path_len;
 
 	slen = sizeof (struct sockaddr_storage);
 	if (getsockname(fd, (struct sockaddr *)(void *)&ss, &slen) < 0)
@@ -849,9 +848,9 @@ __rpc_sockisbound(int fd)
 			return (u_addr.sin6.sin6_port != 0);
 #endif
 		case AF_LOCAL:
-			/* XXX check this */
-			memcpy(&u_addr.usin, &ss, sizeof(u_addr.usin)); 
-			return (u_addr.usin.sun_path[0] != 0);
+			memcpy(&u_addr.usin, &ss, sizeof(u_addr.usin));
+			path_len = slen - offsetof(struct sockaddr_un, sun_path);
+			return path_len > 0;
 		default:
 			break;
 	}

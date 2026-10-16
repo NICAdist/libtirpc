@@ -83,15 +83,21 @@ static struct sgl_limits {
 };
 #else
 
+#ifdef HAVE_ENDIAN_H
 #include <endian.h>
+#else
+#ifdef HAVE_MACHINE_ENDIAN_H
+#include <machine/endian.h>
+#endif
+#endif
 #define IEEEFP
 
 #endif /* vax */
 
 bool_t
-xdr_float(xdrs, fp)
-	XDR *xdrs;
-	float *fp;
+xdr_float(
+	XDR *xdrs,
+	float *fp)
 {
 #ifndef IEEEFP
 	struct ieee_single is;
@@ -191,9 +197,9 @@ static struct dbl_limits {
 
 
 bool_t
-xdr_double(xdrs, dp)
-	XDR *xdrs;
-	double *dp;
+xdr_double(
+	XDR *xdrs,
+	double *dp)
 {
 #ifdef IEEEFP
 	int32_t *i32p;

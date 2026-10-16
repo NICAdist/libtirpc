@@ -37,8 +37,8 @@
 
 #include <rpc/rpc.h>
 
-static bool_t	svcauth_none_destroy();
-static bool_t   svcauth_none_wrap();
+static bool_t	svcauth_none_destroy(SVCAUTH *);
+static bool_t   svcauth_none_wrap(SVCAUTH *, XDR *, bool_t (*)(XDR *, ...), char *);
 
 struct svc_auth_ops svc_auth_none_ops = {
 	svcauth_none_wrap,

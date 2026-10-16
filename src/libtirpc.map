@@ -34,16 +34,10 @@ TIRPC_0.3.0 {
     _svcauth_none;
     _svcauth_short;
     _svcauth_unix;
-    _svcauth_gss;
 
     # a*
     authdes_create;
     authdes_seccreate;
-    authgss_create;
-    authgss_create_default;
-    authgss_free_private_data;
-    authgss_get_private_data;
-    authgss_service;
     authnone_create;
     authunix_create;
     authunix_create_default;
@@ -54,7 +48,6 @@ TIRPC_0.3.0 {
 
     # c*
     callrpc;
-    cbc_crypt;
     clnt_broadcast;
     clnt_create;
     clnt_create_timed;
@@ -79,10 +72,8 @@ TIRPC_0.3.0 {
     clntunix_create;
 
     # e*
-    ecb_crypt;
     endnetconfig;
     endnetpath;
-    endrpcent;
 
     # f*
     freenetconfigent;
@@ -92,13 +83,7 @@ TIRPC_0.3.0 {
     getnetconfig;
     getnetconfigent;
     getnetpath;
-    getrpcent;
-    getrpcbynumber;
-    getrpcbyname;
     getrpcport;
-    gss_log_debug;
-    gss_log_hexdump;
-    gss_log_status;
 
     # n*
     nc_perror;
@@ -118,21 +103,6 @@ TIRPC_0.3.0 {
     rpc_call;
     rpc_control;
     rpc_createerr;
-    rpc_gss_get_error;
-    rpc_gss_get_mech_info;
-    rpc_gss_get_mechanisms;
-    rpc_gss_get_principal_name;
-    rpc_gss_get_versions;
-    rpc_gss_getcred;
-    rpc_gss_is_installed;
-    rpc_gss_max_data_length;
-    rpc_gss_mech_to_oid;
-    rpc_gss_qop_to_num;
-    rpc_gss_seccreate;
-    rpc_gss_set_callback;
-    rpc_gss_set_defaults;
-    rpc_gss_set_svc_name;
-    rpc_gss_svc_max_data_length;
     rpc_nullproc;
     rpc_reg;
     rpcb_getaddr;
@@ -147,7 +117,6 @@ TIRPC_0.3.0 {
     # s*
     setnetconfig;
     setnetpath;
-    setrpcent;
     svc_auth_reg;
     svc_create;
     svc_dg_create;
@@ -194,8 +163,6 @@ TIRPC_0.3.0 {
     # x*
     xdr_accepted_reply;
     xdr_array;
-    xdr_authdes_cred;
-    xdr_authdes_verf;
     xdr_authunix_parms;
     xdr_bool;
     xdr_bytes;
@@ -228,10 +195,6 @@ TIRPC_0.3.0 {
     xdr_replymsg;
     xdr_rmtcall_args;
     xdr_rmtcallres;
-    xdr_rpc_gss_cred;
-    xdr_rpc_gss_data;
-    xdr_rpc_gss_init_args;
-    xdr_rpc_gss_init_res;
     xdr_rpcb;
     xdr_rpcb_entry;
     xdr_rpcb_entry_list_ptr;
@@ -275,14 +238,20 @@ TIRPC_0.3.0 {
     xdrstdio_create;
     xprt_register;
     xprt_unregister;
+    # GSS-API symbols (conditionally included)
+_svcauth_gss; authgss_create; authgss_create_default; authgss_free_private_data; authgss_get_private_data; authgss_service; gss_log_debug; gss_log_hexdump; gss_log_status; rpc_gss_get_error; rpc_gss_get_mech_info; rpc_gss_get_mechanisms; rpc_gss_get_principal_name; rpc_gss_get_versions; rpc_gss_qop_to_num; rpc_gss_seccreate; rpc_gss_set_callback; rpc_gss_set_defaults; rpc_gss_set_svc_name; rpc_gss_svc_max_data_length;
+    # DES crypto symbols (conditionally included)
+
+    # RPC database symbols (conditionally included)
+
 
   local:
     *;
 };
 
 TIRPC_0.3.1 {
-    svcauth_gss_get_principal;
-    svcauth_gss_set_svc_name;
+# GSS-API symbols (conditionally included)
+svcauth_gss_get_principal; svcauth_gss_set_svc_name;
 } TIRPC_0.3.0;
 
 TIRPC_0.3.2 {
@@ -290,7 +259,6 @@ TIRPC_0.3.2 {
     getpublicandprivatekey;
     getpublickey;
     host2netname;
-    key_call_destroy;
     key_decryptsession;
     key_decryptsession_pk;
     key_encryptsession;
