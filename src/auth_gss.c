@@ -982,3 +982,9 @@ rpc_gss_max_data_length(AUTH *auth, int maxlen)
 	rpc_gss_clear_error();
 	return result;
 }
+
+bool_t
+is_authgss_client(CLIENT *clnt)
+{
+	return (clnt->cl_auth->ah_ops == &authgss_ops);
+}

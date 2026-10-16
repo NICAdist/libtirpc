@@ -1,4 +1,4 @@
-AC_INIT(libtirpc, 1.2.6)
+AC_INIT(libtirpc, 1.3.3)
 AM_INIT_AUTOMAKE([silent-rules])
 AM_SILENT_RULES([yes])
 AC_CONFIG_SRCDIR([src/auth_des.c])
@@ -94,7 +94,7 @@ AC_PROG_LIBTOOL
 AC_HEADER_DIRENT
 AC_PREFIX_DEFAULT(/usr)
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h libintl.h limits.h locale.h netdb.h netinet/in.h stddef.h stdint.h stdlib.h string.h sys/ioctl.h sys/param.h sys/socket.h sys/time.h syslog.h unistd.h features.h gssapi/gssapi_ext.h])
-AC_CHECK_LIB([pthread], [pthread_create])
+AX_PTHREAD
 AC_CHECK_FUNCS([getrpcbyname getrpcbynumber setrpcent endrpcent getrpcent])
 
 AC_CONFIG_FILES([Makefile src/Makefile man/Makefile doc/Makefile])
